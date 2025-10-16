@@ -1,0 +1,35 @@
+version: 0.2
+
+env:
+  variables:
+    GRADLE_OPTS: "-Xmx2048m"
+    ANDROID_HOME: "/usr/local/android-sdk-linux"
+  # If you need environment variables for dev (optional)
+  parameter-store:
+    ENVIRONMENT: "/sample-android/dev"
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto17
+    commands:
+      - echo "Installing Android SDK components..."
+      - sdkmanager --licenses
+      - sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+      - chmod +x gradlew
+
+  build:
+    commands:
+      - echo "Starting Gradle build for DEV environment..."
+      - ./gradlew clean assembleDebug
+
+  post_build:
+    commands:
+      - echo "Build completed. Collecting APK files..."
+      - mkdir -p output
+      - cp app/build/outputs/apk/debug/app-debug.apk output/
+
+artifacts:
+  files:
+    - output/app-debug.apk
+  discard-paths: yes
